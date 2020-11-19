@@ -12,8 +12,9 @@ import net.minecraft.util.Identifier;
  * Unique reference to a type of context.
  */
 public final class ContextKey<C> {
-    public static final ContextKey<@Nullable Void> NO_CONTEXT = create(Void.class, new Identifier("fabric:no_context"));
+    // Map must be before NO_CONTEXT or else `of` will NPE.
     private static final Map<Class<?>, Map<Identifier, ContextKey<?>>> CONTEXT_KEYS = new HashMap<>();
+    public static final ContextKey<@Nullable Void> NO_CONTEXT = create(Void.class, new Identifier("fabric:no_context"));
     private final Class<C> clazz;
     private final Identifier identifier;
 
@@ -30,7 +31,7 @@ public final class ContextKey<C> {
         return identifier;
     }
 
-    public synchronized static <C> ContextKey<C> create(Class<C> clazz, Identifier identifier) {
+    public static synchronized <C> ContextKey<C> create(Class<C> clazz, Identifier identifier) {
         Objects.requireNonNull(clazz, "Class type cannot be null");
         Objects.requireNonNull(identifier, "Context key cannot be null");
 

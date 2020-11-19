@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "${id}",
+  "id": "cursed-apiapi",
   "version": "${version}",
 
   "name": "FabLabs ${libname} version ${libver}",
@@ -18,6 +18,6 @@
     "modmenu:api": true
   },
   "mixins": [
-    "api-provider-api-v1.mixins.json"
+    "cursed-apiapi.mixins.json"
   ]
 }

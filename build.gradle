@@ -4,8 +4,8 @@ plugins {
 	id "idea"
 	id "fabric-loom" version "0.5-SNAPSHOT"
 	id "maven-publish"
-	id 'net.minecrell.licenser' version '0.4.1'
-	id "checkstyle"
+	// id 'net.minecrell.licenser' version '0.4.1'
+	// id "checkstyle"
 }
 
 sourceCompatibility = 1.8
@@ -34,9 +34,9 @@ def dirty = !"git diff-index HEAD".execute().in.text.trim().isEmpty()
 
 def libName = "${project.library_name}"
 def libVer = "${project.library_version}"
-archivesBaseName = "fablabs-" + libName + "-v" + libVer
+archivesBaseName = libName
 group = "${project.maven_group}"
-version = branch + "-${project.mod_version}" + "." + commits + (dirty ? "-dirty" : "") + "+${project.minecraft_version}"
+version = "${project.mod_version}" + "-" + commits + "+${project.minecraft_version}"
 def modVersion = "${project.mod_version}" + "-" + commits + "+${project.minecraft_version}" // semver-compatible version string for use in fabric.mod.json
 def modRepo
 if (System.env.REPO_NAME) {
@@ -74,17 +74,17 @@ dependencies {
 	modImplementation "alexiil.mc.lib:libblockattributes-all:${project.lba_version}"
 }
 
-checkstyle {
-	configFile = rootProject.file("checkstyle.xml")
-	toolVersion = '8.31'
-}
+// checkstyle {
+// 	configFile = rootProject.file("checkstyle.xml")
+// 	toolVersion = '8.31'
+// }
 
-license {
-	header = file('LICENSE')
-	include '**/*.java'
-	style.java = 'BLOCK_COMMENT'
-	newLine = true
-}
+// license {
+// 	header = file('LICENSE')
+// 	include '**/*.java'
+// 	style.java = 'BLOCK_COMMENT'
+// 	newLine = true
+// }
 
 
 javadoc {
@@ -154,18 +154,6 @@ assemble.dependsOn javadocsJar
 
 // configure the maven publication
 publishing {
-	repositories {
-		maven {
-		    name = "GitHubPackages"
-		    url = uri("https://maven.pkg.github.com/" + modRepo.toLowerCase())
-		    credentials {
-			username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-			password = project.findProperty("gpr.key") ?: System.getenv("PASSWORD")
-		    }
-		}
-		// uncomment to publish to the local maven
-		// mavenLocal()
-	}
 	publications {
 		mavenJava(MavenPublication) {
 			// add all the jars that should be included when publishing to maven
@@ -175,7 +163,26 @@ publishing {
 			artifact(sourcesJar) {
 				builtBy remapSourcesJar
 			}
-			artifact javadocsJar
+		}
+	}
+	if (file("secret.properties").exists()) {
+		def secrets = new Properties()
+		file("secret.properties").withInputStream { secrets.load(it) }
+
+		// select the repositories you want to publish to
+		repositories {
+			// uncomment to publish to the local maven
+			// mavenLocal()
+			maven {
+				url "https://gitlab.com/api/v4/projects/22574365/packages/maven"
+				credentials(HttpHeaderCredentials) {
+					name = "Private-Token"
+					value = secrets.getProperty("gitLabPrivateToken")
+				}
+				authentication {
+					header(HttpHeaderAuthentication)
+				}
+			}
 		}
 	}
 }

@@ -18,9 +18,18 @@
 *.ipr
 *.iws
 
+# vscode
+
+.settings/
+.vscode/
+bin/
+.classpath
+.project
+
 # Sekrit files
 private.properties
 private.gradle
+secret.properties
 
 # Files from bad operating systems :^)
 Thumbs.db
